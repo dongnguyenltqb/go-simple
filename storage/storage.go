@@ -23,12 +23,8 @@ import (
 var Client *storage.Client
 var Bucket *storage.BucketHandle
 
-type WorkerMessage struct {
-	FileName string
-	Resize bool
-}
 
-var UploadPool chan WorkerMessage
+var UploadPool chan ObjectAddress
 
 type ObjectAddress struct {
 	ID primitive.ObjectID `json:"_id" bson:"_id"`
@@ -89,21 +85,16 @@ func uploadToGCloudStorage(fileName string, finished chan bool) {
 	finished <- true
 }
 
-func UploadImageTaskStealer(UploadPool chan WorkerMessage){
+func UploadImageTaskStealer(UploadPool chan ObjectAddress){
 	for {
 		workerMessage := <- UploadPool
 		finished := make(chan bool)
-		if workerMessage.Resize == true {
-			go ImageAnalysis(ObjectAddress{
-				FileName: workerMessage.FileName,
-			})
-		}
 		go uploadToGCloudStorage(workerMessage.FileName,finished)
 		<- finished
 	}
 }
 
-func InitWorker(UploadPool chan WorkerMessage){
+func InitWorker(UploadPool chan ObjectAddress){
 	for i:=1;i<=10;i++{
 		go UploadImageTaskStealer(UploadPool)
 	}
@@ -124,7 +115,12 @@ func HandleUploadForm(c *gin.Context) {
 		Data:    fileNames,
 	})
 	for _,fileName := range fileNames{
-		UploadPool <- WorkerMessage{FileName: fileName,Resize:true}
+		go func(fileName string) {
+			UploadPool <- ObjectAddress{FileName: fileName}
+		}(fileName)
+		go func(fileName string) {
+			PushTaskToExchange(ObjectAddress{FileName:fileName})
+		}(fileName)
 	}
 }
 
@@ -139,6 +135,7 @@ func GetObject(c *gin.Context) {
 	}
 	c.Redirect(302,objectAttrs.MediaLink)
 }
+
 func PushTaskToExchange( object ObjectAddress){
 	task,_ := json.Marshal(object)
 	message := amqp.Publishing{
@@ -156,7 +153,7 @@ func ImageAnalysis(objectAddress ObjectAddress){
 }
 
 func RegisterStorageController(app *gin.Engine) {
-	UploadPool = make(chan WorkerMessage,100)
+	UploadPool = make(chan ObjectAddress,100)
 	go InitWorker(UploadPool)
 	app.POST("/upload", user.IsAuthenticated, HandleUploadForm)
 	app.GET("/object",GetObject)

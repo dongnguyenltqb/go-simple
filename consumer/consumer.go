@@ -39,11 +39,10 @@ func ResizeWorker(pool <-chan amqp.Delivery){
 			continue
 		}
 		task.Ack(false)
-		workerMessage := mystorage.WorkerMessage{
+		workerMessage := mystorage.ObjectAddress{
 			FileName: resizedFileName,
-			Resize:   false,
 		}
-		go func(workerMessage mystorage.WorkerMessage) {
+		go func(workerMessage mystorage.ObjectAddress) {
 				mystorage.UploadPool <- workerMessage
 		}(workerMessage)
 	}
