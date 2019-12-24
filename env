@@ -1,6 +1,6 @@
 AMQP_URL = "amqp://guest:guest@localhost:5672"
-GOOGLE_CLIENT_ID = "116887067636-b6bdirsfhemg3f8vak49edrqsm5p98de.apps.googleusercontent.com"
-GOOGLE_SECRET_KEY = "gRQkBMReYL5d-UXmO6JacmsB"
+GOOGLE_CLIENT_ID =
+GOOGLE_SECRET_KEY =
 GOOGLE_REDIRECT_URL = "http://localhost:7000/login/google/callback"
 GOOGLE_TOKEN_DEBUG_URL = "https://www.googleapis.com/oauth2/v3/tokeninfo?id_token="
 JWT_SECRET_KEY = "Mua thu la bay, trang tan tren he pho"
