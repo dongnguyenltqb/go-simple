@@ -1,9 +1,9 @@
 AMQP_URL = "amqp://guest:guest@localhost:5672"
-GOOGLE_CLIENT_ID =
-GOOGLE_SECRET_KEY =
+GOOGLE_CLIENT_ID = "YOUR GOOGLE CLIENT KEY"
+GOOGLE_SECRET_KEY = "YOUR GOOGLE SECRET KEY"
 GOOGLE_REDIRECT_URL = "http://localhost:7000/login/google/callback"
 GOOGLE_TOKEN_DEBUG_URL = "https://www.googleapis.com/oauth2/v3/tokeninfo?id_token="
-JWT_SECRET_KEY = "Mua thu la bay, trang tan tren he pho"
+JWT_SECRET_KEY = "Mua thu la bay, trang tan tren he pho ..."
 PORT = "7000"
 MONGODB_URL = "mongodb://localhost:27017"
 ELASTIC_URL = "http://127.0.0.1:9200"

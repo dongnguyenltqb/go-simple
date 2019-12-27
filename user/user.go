@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
-
+	"strings"
 	"github.com/gin-gonic/gin"
 	"github.com/olivere/elastic"
 	"go.mongodb.org/mongo-driver/bson"
@@ -216,9 +216,10 @@ func SearchUser(c *gin.Context) {
 		return
 	}
 
+	q.Keyword =  strings.ToLower(q.Keyword)
 	boolQuery := elastic.NewBoolQuery()
-	wc1 := elastic.NewWildcardQuery("first_name", "*"+q.Keyword+"*")
-	wc2 := elastic.NewWildcardQuery("last_name", "*"+q.Keyword+"*")
+	wc1 := elastic.NewTermQuery("first_name", q.Keyword)
+	wc2 := elastic.NewTermQuery("last_name", q.Keyword)
 	boolQuery.Should(wc1)
 	boolQuery.Should(wc2)
 	es := database.ES6
