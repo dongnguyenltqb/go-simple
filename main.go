@@ -22,7 +22,8 @@ func main(){
 	user.RegistryUserController(app)
 	mystorage.RegisterStorageController(app)
 	publisher.JoinNetWork()
-	go consumer.InitConsumer()
+	go consumer.InitResizeConsumer()
+	go consumer.InitUploadConsumer()
 	go mystorage.LoadBucket()
 	app.Run(":"+os.Getenv("PORT"))
 }

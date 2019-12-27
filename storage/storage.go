@@ -55,7 +55,7 @@ func LoadBucket() {
 	}
 }
 
-func uploadToGCloudStorage(fileName string, finished chan bool) {
+func UploadToGCloudStorage(fileName string, finished chan bool) {
 	f, err := os.Open("storage/image/" + fileName)
 	if err != nil {
 		utils.Logger("error", err)
@@ -85,20 +85,6 @@ func uploadToGCloudStorage(fileName string, finished chan bool) {
 	finished <- true
 }
 
-func UploadImageTaskStealer(UploadPool chan ObjectAddress){
-	for {
-		workerMessage := <- UploadPool
-		finished := make(chan bool)
-		go uploadToGCloudStorage(workerMessage.FileName,finished)
-		<- finished
-	}
-}
-
-func InitWorker(UploadPool chan ObjectAddress){
-	for i:=1;i<=10;i++{
-		go UploadImageTaskStealer(UploadPool)
-	}
-}
 
 func HandleUploadForm(c *gin.Context) {
 	form,_ := c.MultipartForm()
@@ -116,10 +102,8 @@ func HandleUploadForm(c *gin.Context) {
 	})
 	for _,fileName := range fileNames{
 		go func(fileName string) {
-			UploadPool <- ObjectAddress{FileName: fileName}
-		}(fileName)
-		go func(fileName string) {
-			PushTaskToExchange(ObjectAddress{FileName:fileName})
+			go PushTaskToExchangeUploadImage(ObjectAddress{FileName:fileName})
+			go PushTaskToExchangeProcessImage(ObjectAddress{FileName:fileName})
 		}(fileName)
 	}
 }
@@ -136,25 +120,32 @@ func GetObject(c *gin.Context) {
 	c.Redirect(302,objectAttrs.MediaLink)
 }
 
-func PushTaskToExchange( object ObjectAddress){
+func PushTaskToExchangeProcessImage( object ObjectAddress){
 	task,_ := json.Marshal(object)
 	message := amqp.Publishing{
 		Headers:         map[string]interface{}{
 			"type":"image/jpeg",
+			"job":"resize",
 		},
 		Body:	task,
 	}
 	publisher.C.Publish("ProcessImage","", false,false,message)
 }
 
-func ImageAnalysis(objectAddress ObjectAddress){
-	fmt.Println(utils.ApplyStyle("bold","yellow","Analysing this image..."))
-	PushTaskToExchange(objectAddress)
+
+func PushTaskToExchangeUploadImage(object ObjectAddress){
+	task,_ := json.Marshal(object)
+	message := amqp.Publishing{
+		Headers:map[string]interface{}{
+			"type":"image/jpeg",
+			"job":"upload",
+		},
+		Body:task,
+	}
+	publisher.C.Publish("UploadImage","",false,false,message)
 }
 
 func RegisterStorageController(app *gin.Engine) {
-	UploadPool = make(chan ObjectAddress,100)
-	go InitWorker(UploadPool)
 	app.POST("/upload", user.IsAuthenticated, HandleUploadForm)
 	app.GET("/object",GetObject)
 }

@@ -11,8 +11,7 @@ import (
 	"strings"
 )
 
-var C *amqp.Channel
-var ResizeTaskPool chan mystorage.ObjectAddress
+var C1 *amqp.Channel
 
 func ResizeWorker(pool <-chan amqp.Delivery){
 	for{
@@ -39,34 +38,33 @@ func ResizeWorker(pool <-chan amqp.Delivery){
 			continue
 		}
 		task.Ack(false)
-		workerMessage := mystorage.ObjectAddress{
+		resizedObject := mystorage.ObjectAddress{
 			FileName: resizedFileName,
 		}
-		go func(workerMessage mystorage.ObjectAddress) {
-				mystorage.UploadPool <- workerMessage
-		}(workerMessage)
+		go mystorage.PushTaskToExchangeUploadImage(resizedObject)
 	}
 }
 
 func runResizeWorker(numWorker int){
 	for i:=0;i<=numWorker;i++{
-		go ResizeWorker(tasks)
+		go ResizeWorker(tasks_resize)
 	}
 }
 
-var tasks <- chan amqp.Delivery
+var tasks_resize <- chan amqp.Delivery
 
-func InitConsumer(){
+func InitResizeConsumer(){
 
 	conn,err := amqp.Dial(os.Getenv("AMQP_URL"))
-	C,err = conn.Channel()
+	C1,err = conn.Channel()
 	if err!=nil {
 		panic(err)
 	}
-	C.QueueDeclare("ResizeImage",true,false,false,false,nil)
-	C.QueueBind("ResizeImage","","ProcessImage",true, map[string]interface{}{
+	C1.QueueDeclare("ResizeImage",true,false,false,false,nil)
+	C1.QueueBind("ResizeImage","","ProcessImage",true, map[string]interface{}{
 		"type":"image/jpeg",
+		"job":"resize",
 	})
-	tasks,_ = C.Consume("ResizeImage","ResizeImageWorker",false,true,false,false,nil)
+	tasks_resize,_ = C1.Consume("ResizeImage","ResizeImageWorker",false,true,false,false,nil)
 	go runResizeWorker(100)
 }
