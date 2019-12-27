@@ -172,7 +172,7 @@ func LoginWithGoogleCallBack(c *gin.Context){
 		FirstName: decodedInfo.GivenName,
 		LastName:  decodedInfo.FamilyName,
 	}
-
+	u.CacheToRedis()
 	if err = u.AddIfNotExist() ; err != nil {
 		utils.Logger("error",err)
 		c.JSON(400,utils.ApiResponse{

@@ -22,6 +22,7 @@ func main(){
 	user.RegistryUserController(app)
 	mystorage.RegisterStorageController(app)
 	publisher.JoinNetWork()
+	consumer.LoadEnv()
 	go consumer.InitResizeConsumer()
 	go consumer.InitUploadConsumer()
 	go mystorage.LoadBucket()

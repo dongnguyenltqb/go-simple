@@ -12,7 +12,7 @@ import (
 )
 
 var C1 *amqp.Channel
-
+var NumWorker int
 func ResizeWorker(pool <-chan amqp.Delivery){
 	for{
 		task := <- pool
@@ -54,7 +54,6 @@ func runResizeWorker(numWorker int){
 var tasks_resize <- chan amqp.Delivery
 
 func InitResizeConsumer(){
-
 	conn,err := amqp.Dial(os.Getenv("AMQP_URL"))
 	C1,err = conn.Channel()
 	if err!=nil {
@@ -66,5 +65,5 @@ func InitResizeConsumer(){
 		"job":"resize",
 	})
 	tasks_resize,_ = C1.Consume("ResizeImage","ResizeImageWorker",false,true,false,false,nil)
-	go runResizeWorker(100)
+	go runResizeWorker(NumWorker)
 }

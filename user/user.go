@@ -37,6 +37,27 @@ type UserQuery struct {
 	Keyword string `json:"keyword" form:"keyword"`
 }
 
+func (u *User) CacheToRedis() error {
+	cli := database.RedisCLI
+	key := "USER_"+u.Email
+	_,err := cli.HSet(key,"email",u.Email).Result()
+	if err != nil {
+		utils.Logger("error",err)
+		return err
+	}
+	_,err = cli.HSet(key,"first_name",u.FirstName).Result()
+	if err != nil {
+		utils.Logger("error",err)
+		return err
+	}
+	_,err = cli.HSet(key,"last_name",u.LastName).Result()
+	if err != nil {
+		utils.Logger("error",err)
+		return err
+	}
+	return err
+}
+
 func (u *User) AddIfNotExist() error  {
 	isExist,err := database.Models.Users.CountDocuments(context.Background(),bson.M{
 		"email":u.Email,
@@ -241,7 +262,7 @@ func ReIndexUserESSearch(c *gin.Context){
 		})
 		return
 	}
-	// defer cursor.Close(ctx)
+	defer cursor.Close(ctx)
 	ES := database.ES6
 	for cursor.Next(ctx){
 		var u User

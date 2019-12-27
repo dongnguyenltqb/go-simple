@@ -48,5 +48,5 @@ func InitUploadConsumer(){
 		"job":"upload",
 	})
 	tasks_upload,_ = C2.Consume("UploadImageToGCloud","UploadImage",false,true,false,false,nil)
-	go runUploadWorker(100)
+	go runUploadWorker(NumWorker)
 }
