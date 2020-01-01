@@ -13,6 +13,7 @@ import (
 
 var C1 *amqp.Channel
 var NumWorker int
+
 func ResizeWorker(pool <-chan amqp.Delivery){
 	for{
 		task := <- pool

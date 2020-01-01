@@ -7,19 +7,17 @@ require (
 	github.com/DataDog/zstd v1.4.4 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/disintegration/imaging v1.6.2
-	github.com/fortytw2/leaktest v1.3.0 // indirect
 	github.com/gin-gonic/gin v1.5.0
 	github.com/go-redis/redis v6.15.6+incompatible
 	github.com/go-redis/redis/v7 v7.0.0-beta.4 // indirect
-	github.com/go-stack/stack v1.8.0 // indirect
+	github.com/golang/protobuf v1.3.2
 	github.com/golang/snappy v0.0.1 // indirect
-	github.com/google/go-cmp v0.3.1 // indirect
 	github.com/google/uuid v1.1.1
 	github.com/joho/godotenv v1.3.0
 	github.com/mailru/easyjson v0.7.0 // indirect
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/olivere/elastic v6.2.26+incompatible
-	github.com/pkg/errors v0.8.1 // indirect
+	github.com/olivere/elastic/v7 v7.0.9
 	github.com/streadway/amqp v0.0.0-20190827072141-edfb9018d271
 	github.com/tidwall/pretty v1.0.0 // indirect
 	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/dongnguyenltqb/go-rabbit/utils"
-	"github.com/olivere/elastic"
+	"github.com/olivere/elastic/v7"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"github.com/go-redis/redis"
